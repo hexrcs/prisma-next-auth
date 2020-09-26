@@ -4,13 +4,17 @@
 
 # Passwordless Authentication with Next.js, Prisma, and next-auth
 
-In this post, you'll learn how to add passwordless authentication to your [Next.js](https://nextjs.org/) app using [Prisma](https://www.prisma.io/docs/getting-started/quickstart-typescript) and [next-auth](https://github.com/nextauthjs/next-auth). By the end of this tutorial, your user will be able to log in to your app with either their GitHub account or a Slack-styled _magic link_ sent right to their Email inbox.
+In this post, you'll learn how to add passwordless authentication to your [Next.js](https://nextjs.org/) app using [Prisma](https://www.prisma.io/docs/getting-started/quickstart-typescript) and [next-auth](https://github.com/nextauthjs/next-auth). By the end of this tutorial, your user will be able to log in to your app with either their GitHub account or a Slack-style _magic link_ sent right to their Email inbox.
+
+Prisma is a type-safe database client that replaces traditional ORMs, and makes database access easy with an auto-generated query builder. Coupled with `next-auth`, we only need a few steps to implement the complete authentication mechanism, and don't need to write any SQL code ourselves.
 
 If you want to follow along, clone [this repo](https://github.com/hexrcs/prisma-next-auth) and switch to the [`start-here`](https://github.com/hexrcs/prisma-next-auth/tree/start-here) branch! 😃
 
+![`next-auth` OAuth demo](https://i.imgur.com/tVbypFW.gif)<figcaption>Check out the slick auth flow!</figcaption>
+
 ## Step 0: Dependencies and database setup
 
-Before we start, let's install Prisma and `next-auth` into your Next.js project.
+Before we start, let's install Prisma and `next-auth` into the Next.js project.
 
 ```
 npm i next-auth
@@ -44,13 +48,15 @@ Notice that a new directory `prisma` is created under your project. This is wher
 
 Now, replace the dummy database URI in `/prisma/.env` with your own.
 
-![Project structure after running `npx prisma init`](https://i.imgur.com/s0VLzsg.png)
+![Project structure after running `npx prisma init`](https://i.imgur.com/s0VLzsg.png)<figcaption>Project structure after running <code>npx prisma init</code></figcaption>
 
 ## Step 2: Define database schema for authentication
 
 `next-auth` requires us to have [specific tables in our database](https://next-auth.js.org/schemas/models) for it to work seamlessly. In our project, the schema file is located at `/prisma/schema.prisma`.
 
 Let's use the [_default schema_](https://next-auth.js.org/schemas/adapters#prisma-schema) for now, but know that you can always [extend or customize](https://next-auth.js.org/schemas/adapters#custom-models) the data models yourself.
+
+> Note: If you have an existing database, after replacing the dummy database URI, you can run `npx prisma introspect` to generate the `schema.prisma` for your database and work from there. Then, you should add the following data models to the generated `schema.prisma` file.
 
 ```prisma
 datasource db {
@@ -145,7 +151,7 @@ Now, if you open up [Prisma Studio](https://www.prisma.io/docs/reference/tools-a
 npx prisma studio
 ```
 
-![Prisma studio screenshot](https://i.imgur.com/DmeUlem.png)
+![Prisma studio screenshot](https://i.imgur.com/DmeUlem.png)<figcaption>Prisma Studio model selection</figcaption>
 
 ## Step 3: Configure `next-auth`
 
@@ -178,17 +184,17 @@ For the builtin OAuth providers like GitHub, you will need a `clientId` and a `c
 
 First, log into your GitHub account, go to [_Settings_](https://github.com/settings/profile), then navigate to [_Developer Settings_](https://github.com/settings/apps), then switch to [_OAuth Apps_](https://github.com/settings/developers).
 
-![GitHub OAuth apps](https://i.imgur.com/4eQrMAs.png)
+![GitHub OAuth apps](https://i.imgur.com/4eQrMAs.png)<figcaption>GitHub OAuth apps</figcaption>
 
 Clicking on the _Register a new application_ button will redirect you to a registration form to fill out some information for your app. The _Authorization callback URL_ should be the Next.js `/api/auth` route that we defined earlier (`http://localhost:3000/api/auth`).
 
 An important thing to note here is that the _Authorization callback URL_ field only supports 1 URL, unlike Auth0, which allows you to add additional callback URLs separated with a comma. This means if you want to deploy your app later with a production URL, you will need to set up a new GitHub OAuth app.
 
-![Registering an OAuth app](https://i.imgur.com/tYtq5fd.png)
+![Registering an OAuth app](https://i.imgur.com/tYtq5fd.png)<figcaption>Registering an OAuth app</figcaption>
 
 Click on the _Register Application_ button, and then you will be able to find your newly generated Client ID and Client Secret. Copy this info into your `.env` file in the root directory.
 
-![OAuth Client ID and Client Secret](https://i.imgur.com/QwEjV9s.png)
+![Obtaining OAuth Client ID and Client Secret](https://i.imgur.com/QwEjV9s.png)<figcaption>Obtaining OAuth Client ID and Client Secret</figcaption>
 
 Now, let's go back to `/api/auth/[...nextauth].ts` and create a new object called `options`, and source the GitHub OAuth credentials like below.
 
@@ -312,7 +318,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 export default App;
 ```
 
-Now, you can go to `/pages/index.tsx`, and import the `useSession` hook from the `next-auth/client` module. You will also need the `signIn' and `signOut`functions to implement the authentication interaction. The`signIn' function will redirect users to a login form, which is automatically generated by `next-auth`.
+Now, you can go to `/pages/index.tsx`, and import the `useSession` hook from the `next-auth/client` module. You will also need the `signIn` and `signOut`functions to implement the authentication interaction. The`signIn` function will redirect users to a login form, which is automatically generated by `next-auth`.
 
 ```tsx
 import { signIn, signOut, useSession } from "next-auth/client";
@@ -386,8 +392,6 @@ export default IndexPage;
 
 Now, you can spin up the Next.js dev server and play with the authentication flow!
 
-![`next-auth` OAuth demo](https://i.imgur.com/tVbypFW.gif)
-
 ### Step 4.2: Checking user sessions with `getSession()` on the backend
 
 To get user sessions from the backend code, inside either `getServerSideProps()` or an API request handler, you will need to use the `getSession()` async function.
@@ -415,7 +419,7 @@ export default secretHandler;
 
 Go visit `localhost:3000/api/secret` without logging in, and you will see something like in the following image.
 
-![403 error if the user is not logged in](https://i.imgur.com/74G5s1J.png)
+![403 error if the user is not logged in](https://i.imgur.com/74G5s1J.png)<figcaption>403 error if the user is not logged in</figcaption>
 
 ## Conclusion
 
