@@ -60,7 +60,7 @@ model VerificationRequest {
   token      String   @unique
   expires    DateTime
   createdAt  DateTime @default(now()) @map(name: "created_at")
-  updatedAt  DateTime @default(now()) @map(name: "updated_at")
+  updatedAt  DateTime @updatedAt @map(name: "updated_at")
 
   @@map(name: "verification_requests")
 }
