@@ -12,6 +12,8 @@ If you want to follow along, clone [this repo](https://github.com/hexrcs/prisma-
 
 ![`next-auth` OAuth demo](https://i.imgur.com/tVbypFW.gif)<figcaption>Check out the slick auth flow!</figcaption>
 
+**[👉 See Dev.to Post! 📕](https://dev.to/prisma/passwordless-authentication-with-next-js-prisma-and-next-auth-5g8g)**
+
 ## Step 0: Dependencies and database setup
 
 Before we start, let's install Prisma and `next-auth` into the Next.js project.
