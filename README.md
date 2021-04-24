@@ -21,10 +21,12 @@ Before we start, let's install Prisma and `next-auth` into the Next.js project.
 ```
 npm i next-auth
 
-npm i -D @prisma/cli @types/next-auth
+npm i -D @prisma/cli
 ```
 
 _I'm using TypeScript in this tutorial, so I'll also install the type definitions for `next-auth`_
+
+_You do not need to install @types/next-auth, since it's deprecated. [Reference](https://next-auth.js.org/getting-started/typescript)_
 
 You will also need a PostgreSQL database to store all the user data and active tokens.
 
